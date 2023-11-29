@@ -1,0 +1,34 @@
+Model_Name: a
+Model_Type: ANN
+Inputs{
+ Input{
+   Input_Name: b
+   Input_Type: BINARY 
+ }
+ Input{
+   Input_Name: b
+   Input_Type: BINARY 
+ }
+}
+Outputs{
+  Output{
+   Output_Name: d
+   Output_Type: CATEGORICAL
+ }
+ Output{
+   Output_Name: d
+   Output_Type: CATEGORICAL
+ }
+}
+Model{
+  Layers{
+    Layer{
+      Layer_Name: f
+      Layer_Params: [1,2,3] 
+    }
+    Layer{
+      Layer_Name: f
+      Layer_Params: [4,5,6] 
+    }
+  }
+}

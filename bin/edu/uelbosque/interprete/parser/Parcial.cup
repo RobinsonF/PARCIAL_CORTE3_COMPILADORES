@@ -1,0 +1,219 @@
+package edu.uelbosque.interprete.parser;
+
+import java_cup.runtime.*;
+import edu.uelbosque.interprete.ast.*;
+import edu.uelbosque.interprete.ast.Number;
+
+parser code {:
+
+  SymbolTable st = new SymbolTable();
+
+:};
+
+
+terminal String MODEL_NAME, MODEL_FAMILY, MODEL_TYPE, MODEL_TYPE_NAME, MODEL_DESCRIPTION;
+terminal String OUTPUTS, OUTPUT, OUTPUT_NAME, OUTPUT_TYPE;
+terminal String INPUTS, INPUT, INPUT_NAME, INPUT_TYPE;
+terminal String MODEL, LAYERS, LAYER, LAYER_NAME, LAYER_PARAMS;
+terminal String FREETEXT, CATEGORICAL, NUMBER, BINARY, ANN, TREE;
+terminal String RANDOMFOREST, SVM, DECISIONTREE, CLASSIFIER, REGRESSION, CLUSTERING;
+terminal String LBRACE, RBRACE, LBRACKET, RBRACKET, COLON, COMMA;
+
+non terminal Document DOCUMENTO;
+non terminal ModelName MODELNAME;
+non terminal ModelFamily MODELFAMILY;
+non terminal ModelFamilyName MODELFAMILYNAME;
+non terminal ModelType MODELTYPE;
+non terminal ModelTypeName MODELTYPENAME;
+non terminal ModelDescription MODELDESCRIPTION;
+non terminal Inputs INPUTS_NON;
+non terminal InputList INPUTLIST;
+non terminal Input INPUT_NON;
+non terminal InputName INPUTNAME;
+non terminal InputType INPUTTYPE;
+non terminal InputTypeName INPUTTYPENAME;	
+non terminal Outputs OUTPUTS_NON;
+non terminal OutputList OUTPUTLIST;
+non terminal Output OUTPUT_NON;
+non terminal OutputName OUTPUTNAME;
+non terminal OutputType OUTPUTTYPE;
+non terminal OutputTypeName OUTPUTTYPENAME;
+non terminal Model MODEL_NON;
+non terminal LayersTList LAYERSTLIST_NON;
+non terminal Layers LAYERS_NON;
+non terminal LayersList LAYERSLIST;
+non terminal LayerList LAYERLIST;
+non terminal Layer LAYER_NON;
+non terminal LayerName LAYERNAME;
+non terminal LayerParams LAYERPARAMS;
+non terminal Numbers NUMBERS;
+non terminal Number NUMBER_NON;
+non terminal Read LEE;
+non terminal Write ESCRIB;
+non terminal Variable IDENTIFICADOR;
+
+start with DOCUMENTO;
+
+DOCUMENTO 			::= MODELNAME:mn MODELTYPE:mt INPUTS_NON:i OUTPUTS_NON:o MODEL_NON:m
+		           		{: RESULT = new Document(mn, mt, i, o, m); :};
+
+MODELNAME 			::= MODEL_NAME COLON FREETEXT 
+           				{: RESULT = new ModelName(); :};
+           
+MODELTYPE 			::= MODEL_TYPE COLON MODELTYPENAME:n
+           				{: RESULT = new ModelType(n); :};
+           
+MODELTYPENAME 		::= ANN:a
+						{: RESULT = new ModelTypeName("ANN"); :}  
+			           	| 
+			           	TREE:t
+			           	{: RESULT = new ModelTypeName("TREE"); :}
+			           	| 
+			           	RANDOMFOREST:r
+			           	{: RESULT = new ModelTypeName("RANDOMFOREST"); :}
+			           	| 
+			           	SVM:s
+			           	{: RESULT = new ModelTypeName("SVM"); :}
+			           	| 
+			           	DECISIONTREE:d
+			           	{: RESULT = new ModelTypeName("DECISIONTREE"); :}
+			           	;
+             
+INPUTS_NON 			::= INPUTS LBRACE INPUTLIST:l RBRACE
+        				{: RESULT = new Inputs(l); :};
+        
+INPUTLIST 			::= INPUTLIST:il INPUT_NON:i
+			          	{: 
+			          	RESULT = new InputList(il,i); 
+			          	st.addInputList(RESULT);
+			          	:}
+			         	| 
+			         	INPUT_NON:i
+			         	{: 
+			         	RESULT = new InputList(i); 
+			         	st.addInputList(RESULT);
+			         	:}
+			         	;
+         
+INPUT_NON 			::= INPUT LBRACE INPUTNAME:in INPUTTYPE:it RBRACE
+       					{: 
+       					RESULT = new Input(in, it); 
+       					:};
+       
+INPUTNAME 			::= INPUT_NAME COLON FREETEXT:t
+          				{: RESULT = new InputName(t); :};
+          
+INPUTTYPE 			::= INPUT_TYPE COLON INPUTTYPENAME:i
+         				{: RESULT = new InputType(i); :};
+         
+INPUTTYPENAME 		::= NUMBER:n
+				 		{: RESULT = new InputTypeName("NUMBER"); :}
+			            |
+			            CATEGORICAL:c
+			            {: RESULT = new InputTypeName("CATEGORICAL"); :}
+			            |
+			            BINARY:b
+			            {: RESULT = new InputTypeName("BINARY"); :}
+			            ;
+         
+OUTPUTS_NON 		::= OUTPUTS LBRACE OUTPUTLIST:o RBRACE
+        				{: RESULT = new Outputs(o); :};
+             
+OUTPUTLIST 			::= OUTPUTLIST:ol OUTPUT_NON:o
+			          	{: 
+			          	RESULT = new OutputList(ol,o); 
+			          	st.addOutputList(RESULT);
+			          	:}
+			         	|
+			         	OUTPUT_NON:o
+			         	{: 
+			         	RESULT = new OutputList(o); 
+			         	st.addOutputList(RESULT);
+			         	:}
+			         	;
+        
+OUTPUT_NON 			::= OUTPUT LBRACE OUTPUTNAME:on OUTPUTTYPE:ot RBRACE
+       					{: RESULT = new Output(on, ot); :};
+          
+OUTPUTNAME 			::= OUTPUT_NAME COLON FREETEXT:t
+          				{: RESULT = new OutputName(t); :};
+          
+OUTPUTTYPE 			::= OUTPUT_TYPE COLON OUTPUTTYPENAME:o
+         				{: RESULT = new OutputType(o); :};
+          
+OUTPUTTYPENAME 		::= NUMBER:n
+				 		{: RESULT = new OutputTypeName("NUMBER"); :}
+			            | 
+			            CATEGORICAL:c
+			            {: RESULT = new OutputTypeName("CATEGORICAL"); :}
+			            | 
+			            BINARY:b
+			            {: RESULT = new OutputTypeName("BINARY"); :}
+			            ;
+             
+MODEL_NON 			::= MODEL LBRACE LAYERSTLIST_NON:l RBRACE
+      					{: RESULT = new Model(l); :};
+      					
+LAYERSTLIST_NON		::= LAYERSTLIST_NON:ll LAYERS_NON:ln
+			      		{: RESULT = new LayersTList(ll, ln); :}
+			      		|
+			      		LAYERS_NON:ln
+			      		{: RESULT = new LayersTList(ln); :}
+			      		; 
+      					
+LAYERS_NON			::= LAYERS LBRACE LAYERSLIST:l RBRACE
+						{: RESULT = new Layers(l); :};
+      		
+LAYERSLIST 			::= LAYERLIST:ln
+			      		{: 
+			      		RESULT = new LayersList(ln); 
+			      		:}
+			      		;   
+
+LAYERLIST 			::= LAYERLIST:ll LAYER_NON:ln
+			      		{: RESULT = new LayerList(ll, ln); :}
+			      		|
+			      		LAYER_NON:ln
+			      		{: RESULT = new LayerList(ln); :}
+			      		;        
+
+LAYER_NON 			::= LAYER LBRACE LAYERNAME:ln LAYERPARAMS:lp RBRACE
+       					{: RESULT = new Layer(ln, lp); :}; 
+       
+LAYERNAME 			::= LAYER_NAME COLON FREETEXT
+          				{: RESULT = new LayerName(); :};  
+
+LAYERPARAMS 		::= LAYER_PARAMS COLON LBRACKET NUMBERS:ns RBRACKET
+            			{: 
+            			RESULT = new LayerParams(ns); 
+            			st.addLayerParams(RESULT);
+            			:};
+
+NUMBERS 			::= NUMBER_NON:n COMMA NUMBERS:ns
+			         	{: 
+			         	RESULT = new Numbers(ns, n); 
+			         	:}
+			        	|
+			        	NUMBER_NON:n
+			        	{: 
+			        	RESULT = new Numbers(n); 
+			        	:}
+			        	;
+        
+NUMBER_NON 			::= NUMBER:n  
+        				{: 
+        					RESULT = new Number(n); 
+        				:}
+        				;
+        				
+
+ESCRIB 				::= IDENTIFICADOR:v
+						{: RESULT = new Write(v); :}
+						;
+						
+IDENTIFICADOR   	::= FREETEXT:v
+                        {: 
+                           RESULT = new Variable(v);                         
+                        :}
+                        ;
+        
